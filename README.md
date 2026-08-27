@@ -32,6 +32,9 @@ device.
   roughly consistent amount, shows typical amount/last seen/next expected
   per merchant, a total committed monthly spend, and lets you dismiss a
   false positive
+- "Month-on-month by category" view: spend in the most recent complete
+  month versus the one before it, per category, sorted by largest increase
+  first, with the change shown in both £ and %
 - Sample data included, so the dashboard is meaningful before you upload
   anything
 - Data persists locally (`localStorage`) between visits; "Clear all data"
@@ -89,6 +92,8 @@ js/categories.js      Category taxonomy + keyword auto-categorisation
 js/merchant.js        Merchant name normalisation for category rules
 js/recurring.js       Recurring-payment detection
 js/recurringTable.js  Recurring & subscriptions panel rendering
+js/monthOverMonth.js       Month-on-month by category calculations
+js/monthOverMonthTable.js  Month-on-month by category table rendering
 js/summary.js        Stats / category totals / monthly totals
 js/charts.js          Dependency-free SVG charts
 js/table.js          Sortable transaction table
