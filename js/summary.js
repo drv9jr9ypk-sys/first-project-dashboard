@@ -88,8 +88,8 @@ export function computeCategoryTotals(transactions) {
     .sort((a, b) => b.total - a.total);
 }
 
-const MONTH_LABEL = new Intl.DateTimeFormat(undefined, { month: "short" });
-const MONTH_YEAR_LABEL = new Intl.DateTimeFormat(undefined, { month: "short", year: "numeric" });
+const MONTH_LABEL = new Intl.DateTimeFormat("en-GB", { month: "short" });
+const MONTH_YEAR_LABEL = new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" });
 
 /**
  * Monthly totals for the trend chart. With no theme selected this is the

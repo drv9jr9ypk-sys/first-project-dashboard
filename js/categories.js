@@ -44,7 +44,7 @@ export const CATEGORIES = [
       "united air", "southwest air", "airline", "toll", "car rental",
       "hertz", "avis", "enterprise rent",
       "trainline", "national rail", "stagecoach", "national express",
-      "tfl.gov", "tfl travel", "service station",
+      "tfl.gov", "tfl travel", "tfl ", "service station",
     ],
   },
   {
@@ -63,6 +63,7 @@ export const CATEGORIES = [
       "direct line", "geico", "sky broadband", "sky tv", "virgin media",
       "ee ltd", "vodafone", "o2 ", "three mobile", "honest mobile",
       "giffgaff", "aa membership", "rac ", "personal loan", " mtg ",
+      "bt broadband", "bt.com", "bt group",
     ],
   },
   {
@@ -86,7 +87,7 @@ export const CATEGORIES = [
       "amazon", "amzn", "target", "best buy", "ebay", "etsy", "ikea", "macy's",
       "nordstrom", "old navy", "home depot", "lowe's", "tj maxx",
       "marshalls", "sephora", "online store", "shein", "wayfair",
-      "moonpig", "iherb",
+      "moonpig", "iherb", "john lewis", "argos",
     ],
   },
   {
