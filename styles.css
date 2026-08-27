@@ -597,6 +597,71 @@ body {
   white-space: nowrap;
 }
 
+/* ---------- Recurring & subscriptions ---------- */
+
+.recurring-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.recurring-header h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.recurring-subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  max-width: 46ch;
+}
+
+.recurring-committed-tile {
+  min-width: 200px;
+}
+
+.recurring-category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.recurring-category-chip::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--chip-color);
+  flex-shrink: 0;
+}
+
+.recurring-table th {
+  white-space: nowrap;
+}
+
+.recurring-dismiss {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 999px;
+  line-height: 1;
+}
+
+.recurring-dismiss:hover {
+  background: var(--border);
+  color: var(--critical);
+}
+
 /* ---------- Transactions ---------- */
 
 .transactions-header {

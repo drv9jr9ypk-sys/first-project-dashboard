@@ -27,6 +27,11 @@ device.
   customisable arrangement (sort by size or alphabetically, and optionally
   fold small slices into "Other")
 - Sortable, searchable transaction table
+- "Recurring & subscriptions" panel: detects same-merchant payments at a
+  regular cadence (monthly, every 4 weeks, quarterly, or annual) with a
+  roughly consistent amount, shows typical amount/last seen/next expected
+  per merchant, a total committed monthly spend, and lets you dismiss a
+  false positive
 - Sample data included, so the dashboard is meaningful before you upload
   anything
 - Data persists locally (`localStorage`) between visits; "Clear all data"
@@ -82,6 +87,8 @@ js/store.js          In-memory + localStorage state
 js/pdfParser.js       PDF text extraction + transaction parsing
 js/categories.js      Category taxonomy + keyword auto-categorisation
 js/merchant.js        Merchant name normalisation for category rules
+js/recurring.js       Recurring-payment detection
+js/recurringTable.js  Recurring & subscriptions panel rendering
 js/summary.js        Stats / category totals / monthly totals
 js/charts.js          Dependency-free SVG charts
 js/table.js          Sortable transaction table

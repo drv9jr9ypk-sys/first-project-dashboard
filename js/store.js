@@ -13,6 +13,7 @@ class Store {
     this.transactions = [];
     this.sources = []; // { name, count, addedAt }
     this.categoryRules = new Map(); // normalised merchant -> category id
+    this.dismissedRecurring = new Set(); // normalised merchants dismissed as false-positive recurring payments
     this.usingSampleData = true;
     this.listeners = new Set();
     this._load();
@@ -51,9 +52,11 @@ class Store {
       }));
       this.sources = saved.sources || [];
       this.categoryRules = new Map(saved.categoryRules || []);
+      this.dismissedRecurring = new Set(saved.dismissedRecurring || []);
       this.usingSampleData = false;
     } else {
       this.categoryRules = new Map();
+      this.dismissedRecurring = new Set();
       this.transactions = generateSampleTransactions().map((t) => this._toTransaction(t));
       this.sources = [];
       this.usingSampleData = true;
@@ -100,6 +103,7 @@ class Store {
           transactions: this.transactions,
           sources: this.sources,
           categoryRules: [...this.categoryRules.entries()],
+          dismissedRecurring: [...this.dismissedRecurring],
         })
       );
     } catch (err) {
@@ -182,6 +186,16 @@ class Store {
     this._notify();
   }
 
+  dismissRecurring(merchant) {
+    this.dismissedRecurring.add(merchant);
+    this._persist();
+    this._notify();
+  }
+
+  getDismissedRecurring() {
+    return [...this.dismissedRecurring];
+  }
+
   removeSource(sourceName) {
     this.transactions = this.transactions.filter((t) => t.sourceFile !== sourceName);
     this.sources = this.sources.filter((s) => s.name !== sourceName);
@@ -194,6 +208,7 @@ class Store {
 
   _load_sample_only() {
     this.categoryRules = new Map();
+    this.dismissedRecurring = new Set();
     this.transactions = generateSampleTransactions().map((t) => this._toTransaction(t));
     this.sources = [];
     this.usingSampleData = true;
