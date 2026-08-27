@@ -12,7 +12,10 @@ device.
 - Drag-and-drop (or click-to-browse) upload for PDF statements
 - Client-side PDF text parsing into transactions (date, description, amount)
 - Automatic categorisation (groceries, eating out, transport, bills &
-  utilities, subscriptions, shopping, entertainment, health, income)
+  utilities, subscriptions, shopping, entertainment, health, income) with
+  a comprehensive UK merchant keyword list, matched anywhere in the
+  transaction description regardless of statement prefixes like "CARD
+  PAYMENT TO", "DD", "DIRECT DEBIT", "BACS", or "FASTER PAYMENT"
 - Manual re-categorisation via a dropdown on any transaction — remembered
   as a merchant rule (matched on a normalised merchant name, so store
   numbers/dates/branch suffixes don't matter) and applied automatically to
@@ -38,6 +41,12 @@ device.
 - "Top 10 merchants by spend" table: total spent, transaction count, and
   average per transaction per merchant, respecting the selected time-period
   filter
+- "Uncategorised transactions" review panel: every "Other" spend
+  transaction grouped by merchant and sorted by total spend, with an
+  "Other spend" percentage of total spend always visible; assigning a
+  category there creates a permanent rule via the same category-rules
+  system, so genuinely unrecognised merchants are easy to find and fix
+  once rather than guessed at
 - Sample data included, so the dashboard is meaningful before you upload
   anything
 - Data persists locally (`localStorage`) between visits; "Clear all data"
@@ -99,6 +108,8 @@ js/monthOverMonth.js       Month-on-month by category calculations
 js/monthOverMonthTable.js  Month-on-month by category table rendering
 js/topMerchants.js         Top merchants by spend calculations
 js/topMerchantsTable.js    Top merchants by spend table rendering
+js/uncategorized.js        Uncategorised-by-merchant grouping + Other-spend share
+js/uncategorizedTable.js   Uncategorised transactions panel rendering
 js/summary.js        Stats / category totals / monthly totals
 js/charts.js          Dependency-free SVG charts
 js/table.js          Sortable transaction table
