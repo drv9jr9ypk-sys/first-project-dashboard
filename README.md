@@ -13,7 +13,11 @@ device.
 - Client-side PDF text parsing into transactions (date, description, amount)
 - Automatic categorisation (groceries, eating out, transport, bills &
   utilities, subscriptions, shopping, entertainment, health, income)
-- Manual re-categorisation via a dropdown on any transaction
+- Manual re-categorisation via a dropdown on any transaction — remembered
+  as a merchant rule (matched on a normalised merchant name, so store
+  numbers/dates/branch suffixes don't matter) and applied automatically to
+  every matching transaction, including future uploads; view or delete
+  rules in the "Category rules" panel
 - All amounts shown in GBP (£)
 - Summary view: total spend, total income, net, spend by theme, and a
   monthly spend trend
@@ -77,6 +81,7 @@ js/app.js            Wiring: upload, filters, rendering
 js/store.js          In-memory + localStorage state
 js/pdfParser.js       PDF text extraction + transaction parsing
 js/categories.js      Category taxonomy + keyword auto-categorisation
+js/merchant.js        Merchant name normalisation for category rules
 js/summary.js        Stats / category totals / monthly totals
 js/charts.js          Dependency-free SVG charts
 js/table.js          Sortable transaction table

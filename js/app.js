@@ -1,6 +1,7 @@
 import { store } from "./store.js";
 import { parsePdfFile } from "./pdfParser.js";
 import { ALL_CATEGORIES, categoryById } from "./categories.js";
+import { displayMerchant } from "./merchant.js";
 import {
   PERIODS,
   CHART_TYPES,
@@ -40,11 +41,18 @@ const trendChartEl = document.getElementById("trend-chart");
 const searchInput = document.getElementById("search-input");
 const tableContainer = document.getElementById("table-container");
 
+const rulesToggle = document.getElementById("rules-toggle");
+const rulesCount = document.getElementById("rules-count");
+const rulesPanel = document.getElementById("rules-panel");
+const rulesEmpty = document.getElementById("rules-empty");
+const rulesList = document.getElementById("rules-list");
+
 const money = (v) =>
   v.toLocaleString("en-GB", { style: "currency", currency: "GBP", minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 let sortState = { key: "date", dir: "desc" };
 let filters = { search: "", category: "all", period: "all", chartType: "bar", categorySort: "value-desc", groupSmall: false };
+let rulesOpen = false;
 
 function populateThemeFilter() {
   themeFilter.innerHTML = '<option value="all">All themes</option>';
@@ -99,6 +107,52 @@ function populateSortOptions() {
   }
 }
 
+function renderRulesPanel() {
+  const rules = store.getCategoryRules();
+
+  rulesCount.hidden = rules.length === 0;
+  rulesCount.textContent = rules.length;
+  rulesToggle.setAttribute("aria-expanded", String(rulesOpen));
+  rulesPanel.hidden = !rulesOpen;
+  if (!rulesOpen) return;
+
+  rulesEmpty.hidden = rules.length > 0;
+  rulesList.innerHTML = "";
+  for (const rule of rules) {
+    const li = document.createElement("li");
+
+    const merchant = document.createElement("span");
+    merchant.className = "rule-merchant";
+    merchant.textContent = displayMerchant(rule.merchant);
+
+    const arrow = document.createElement("span");
+    arrow.className = "rule-arrow";
+    arrow.textContent = "→";
+
+    const category = document.createElement("span");
+    category.className = "rule-category";
+    category.textContent = categoryById(rule.categoryId).label;
+
+    const count = document.createElement("span");
+    count.className = "rule-count";
+    count.textContent = `${rule.count} transaction${rule.count === 1 ? "" : "s"}`;
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.className = "rule-delete";
+    deleteBtn.setAttribute("aria-label", `Delete rule for ${displayMerchant(rule.merchant)}`);
+    deleteBtn.textContent = "×";
+    deleteBtn.addEventListener("click", () => store.deleteCategoryRule(rule.merchant));
+
+    li.appendChild(merchant);
+    li.appendChild(arrow);
+    li.appendChild(category);
+    li.appendChild(count);
+    li.appendChild(deleteBtn);
+    rulesList.appendChild(li);
+  }
+}
+
 function applySearch(transactions) {
   const q = filters.search.trim().toLowerCase();
   if (!q) return transactions;
@@ -126,6 +180,7 @@ function render(state) {
 
   renderPeriodTabs();
   renderChartTypeTabs();
+  renderRulesPanel();
   if (themeFilter.value !== filters.category) themeFilter.value = filters.category;
   if (categorySortEl.value !== filters.categorySort) categorySortEl.value = filters.categorySort;
   if (groupSmallToggle.checked !== filters.groupSmall) groupSmallToggle.checked = filters.groupSmall;
@@ -227,6 +282,11 @@ clearBtn.addEventListener("click", () => {
     store.clearAll();
     setStatus("", "info");
   }
+});
+
+rulesToggle.addEventListener("click", () => {
+  rulesOpen = !rulesOpen;
+  renderRulesPanel();
 });
 
 searchInput.addEventListener("input", () => {

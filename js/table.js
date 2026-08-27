@@ -66,11 +66,16 @@ export function renderTable(container, transactions, { sortState, onSortChange, 
     const descTd = document.createElement("td");
     descTd.className = "col-description";
     descTd.textContent = tx.description;
-    if (tx.manual) {
+    if (tx.categorySource === "manual" || tx.categorySource === "rule") {
       const badge = document.createElement("span");
       badge.className = "manual-badge";
-      badge.title = "Manually re-categorised";
-      badge.textContent = "edited";
+      if (tx.categorySource === "manual") {
+        badge.title = "Manually re-categorised";
+        badge.textContent = "edited";
+      } else {
+        badge.title = "Categorised via a saved merchant rule";
+        badge.textContent = "rule";
+      }
       descTd.appendChild(badge);
     }
     tr.appendChild(descTd);

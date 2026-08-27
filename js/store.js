@@ -1,5 +1,6 @@
 import { autoCategorize } from "./categories.js";
 import { generateSampleTransactions } from "./sampleData.js";
+import { normalizeMerchant } from "./merchant.js";
 
 const STORAGE_KEY = "finance-dashboard-v1";
 
@@ -11,6 +12,7 @@ class Store {
   constructor() {
     this.transactions = [];
     this.sources = []; // { name, count, addedAt }
+    this.categoryRules = new Map(); // normalised merchant -> category id
     this.usingSampleData = true;
     this.listeners = new Set();
     this._load();
@@ -43,21 +45,62 @@ class Store {
     }
 
     if (saved && Array.isArray(saved.transactions) && saved.transactions.length > 0) {
-      this.transactions = saved.transactions;
+      this.transactions = saved.transactions.map((t) => ({
+        ...t,
+        categorySource: t.categorySource || (t.manual ? "manual" : "auto"),
+      }));
       this.sources = saved.sources || [];
+      this.categoryRules = new Map(saved.categoryRules || []);
       this.usingSampleData = false;
     } else {
+      this.categoryRules = new Map();
       this.transactions = generateSampleTransactions().map((t) => this._toTransaction(t));
       this.sources = [];
       this.usingSampleData = true;
     }
+
+    // Any manual edits made before category rules existed (or made on a
+    // previous device import) become rules retroactively, and are then
+    // applied to every other transaction from the same merchant.
+    this._backfillRulesFromManualEdits();
+  }
+
+  _backfillRulesFromManualEdits() {
+    let changed = false;
+
+    for (const tx of this.transactions) {
+      if (tx.categorySource !== "manual") continue;
+      const key = normalizeMerchant(tx.description);
+      if (this.categoryRules.get(key) !== tx.category) {
+        this.categoryRules.set(key, tx.category);
+        changed = true;
+      }
+    }
+
+    if (this.categoryRules.size > 0) {
+      for (const tx of this.transactions) {
+        const key = normalizeMerchant(tx.description);
+        const ruleCategory = this.categoryRules.get(key);
+        if (ruleCategory !== undefined && tx.category !== ruleCategory) {
+          tx.category = ruleCategory;
+          tx.categorySource = "rule";
+          changed = true;
+        }
+      }
+    }
+
+    if (changed) this._persist();
   }
 
   _persist() {
     try {
       localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ transactions: this.transactions, sources: this.sources })
+        JSON.stringify({
+          transactions: this.transactions,
+          sources: this.sources,
+          categoryRules: [...this.categoryRules.entries()],
+        })
       );
     } catch (err) {
       console.warn("Could not save dashboard data:", err);
@@ -65,15 +108,17 @@ class Store {
   }
 
   _toTransaction(raw) {
-    const category = autoCategorize(raw.description, raw.amount);
+    const autoCategory = autoCategorize(raw.description, raw.amount);
+    const ruleCategory = this.categoryRules.get(normalizeMerchant(raw.description));
+    const category = ruleCategory !== undefined ? ruleCategory : autoCategory;
     return {
       id: raw.id || `${raw.sourceFile}-${raw.rawId}-${crypto.randomUUID()}`,
       date: raw.date,
       description: raw.description,
       amount: raw.amount,
       category,
-      autoCategory: category,
-      manual: false,
+      autoCategory,
+      categorySource: ruleCategory !== undefined ? "rule" : "auto",
       sourceFile: raw.sourceFile,
     };
   }
@@ -95,11 +140,44 @@ class Store {
     return withIds.length;
   }
 
+  /**
+   * Manually re-categorise one transaction, remember the merchant -> category
+   * rule, and apply it to every other transaction from the same merchant
+   * (now, and automatically on every future upload via _toTransaction).
+   */
   setCategory(transactionId, categoryId) {
     const tx = this.transactions.find((t) => t.id === transactionId);
     if (!tx) return;
+
+    const key = normalizeMerchant(tx.description);
     tx.category = categoryId;
-    tx.manual = categoryId !== tx.autoCategory;
+    tx.categorySource = "manual";
+    this.categoryRules.set(key, categoryId);
+
+    for (const other of this.transactions) {
+      if (other.id === tx.id || normalizeMerchant(other.description) !== key) continue;
+      if (other.category !== categoryId) {
+        other.category = categoryId;
+        other.categorySource = "rule";
+      }
+    }
+
+    this._persist();
+    this._notify();
+  }
+
+  getCategoryRules() {
+    return [...this.categoryRules.entries()]
+      .map(([merchant, categoryId]) => ({
+        merchant,
+        categoryId,
+        count: this.transactions.filter((t) => normalizeMerchant(t.description) === merchant).length,
+      }))
+      .sort((a, b) => a.merchant.localeCompare(b.merchant));
+  }
+
+  deleteCategoryRule(merchant) {
+    this.categoryRules.delete(merchant);
     this._persist();
     this._notify();
   }
@@ -115,6 +193,7 @@ class Store {
   }
 
   _load_sample_only() {
+    this.categoryRules = new Map();
     this.transactions = generateSampleTransactions().map((t) => this._toTransaction(t));
     this.sources = [];
     this.usingSampleData = true;

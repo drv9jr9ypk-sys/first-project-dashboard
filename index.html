@@ -92,9 +92,22 @@
       <div class="transactions-header">
         <h2 id="transactions-heading">Transactions</h2>
         <div class="table-filters">
+          <button type="button" id="rules-toggle" class="rules-toggle" aria-expanded="false" aria-controls="rules-panel">
+            Category rules<span id="rules-count" class="rules-count" hidden>0</span>
+          </button>
           <input type="search" id="search-input" class="search-input" placeholder="Search description…" aria-label="Search transactions" />
         </div>
       </div>
+
+      <div id="rules-panel" class="rules-panel" hidden>
+        <p class="rules-panel-intro">
+          Change a transaction's category below and it's remembered here — applied to every matching transaction now,
+          and automatically on every future upload.
+        </p>
+        <p id="rules-empty" class="chart-empty" hidden>No category rules yet.</p>
+        <ul id="rules-list" class="rules-list"></ul>
+      </div>
+
       <div id="table-container" class="table-container"></div>
     </section>
 
