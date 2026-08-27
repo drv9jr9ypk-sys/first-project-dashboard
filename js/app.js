@@ -20,6 +20,8 @@ import { computeMonthOverMonth } from "./monthOverMonth.js";
 import { renderMonthOverMonth } from "./monthOverMonthTable.js";
 import { computeTopMerchants } from "./topMerchants.js";
 import { renderTopMerchants } from "./topMerchantsTable.js";
+import { computeUncategorized, computeOtherShare } from "./uncategorized.js";
+import { renderUncategorizedPanel } from "./uncategorizedTable.js";
 
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("file-input");
@@ -46,6 +48,9 @@ const trendChartEl = document.getElementById("trend-chart");
 
 const searchInput = document.getElementById("search-input");
 const tableContainer = document.getElementById("table-container");
+
+const uncategorizedShare = document.getElementById("uncategorized-share");
+const uncategorizedContainer = document.getElementById("uncategorized-container");
 
 const recurringCommitted = document.getElementById("recurring-committed");
 const recurringContainer = document.getElementById("recurring-container");
@@ -165,6 +170,14 @@ function renderRulesPanel() {
   }
 }
 
+function renderUncategorized(transactions) {
+  const { otherTotal, percentage } = computeOtherShare(transactions);
+  uncategorizedShare.textContent = `${money(otherTotal)} · ${percentage.toFixed(0)}%`;
+  renderUncategorizedPanel(uncategorizedContainer, computeUncategorized(transactions), {
+    onAssign: (transactionId, categoryId) => store.setCategory(transactionId, categoryId),
+  });
+}
+
 function renderRecurring(transactions) {
   const recurring = detectRecurring(transactions, store.getDismissedRecurring());
   recurringCommitted.textContent = money(computeCommittedMonthlySpend(recurring));
@@ -211,6 +224,7 @@ function render(state) {
   renderPeriodTabs();
   renderChartTypeTabs();
   renderRulesPanel();
+  renderUncategorized(transactions);
   renderRecurring(transactions);
   renderMonthOverMonthSection(transactions);
   if (themeFilter.value !== filters.category) themeFilter.value = filters.category;
