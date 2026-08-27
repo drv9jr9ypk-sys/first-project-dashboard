@@ -36,7 +36,13 @@
     </section>
 
     <section class="card" aria-labelledby="summary-heading">
-      <h2 id="summary-heading">Summary</h2>
+      <div class="summary-header">
+        <h2 id="summary-heading">Summary</h2>
+        <div class="filters-bar">
+          <div id="period-tabs" class="period-tabs" role="group" aria-label="Time period"></div>
+          <select id="theme-filter" class="theme-filter" aria-label="Filter by theme"></select>
+        </div>
+      </div>
       <div class="stat-grid">
         <div class="stat-tile">
           <span class="stat-label">Total spend</span>
@@ -57,12 +63,12 @@
       </div>
 
       <div class="chart-grid">
-        <div class="chart-card">
-          <h3>Spend by category</h3>
+        <div id="category-chart-card" class="chart-card">
+          <h3>Spend by theme</h3>
           <div id="category-chart" class="chart-container"></div>
         </div>
         <div class="chart-card">
-          <h3>Monthly spend trend</h3>
+          <h3 id="trend-heading">Monthly spend trend</h3>
           <div id="trend-chart" class="chart-container"></div>
         </div>
       </div>
@@ -73,7 +79,6 @@
         <h2 id="transactions-heading">Transactions</h2>
         <div class="table-filters">
           <input type="search" id="search-input" class="search-input" placeholder="Search description…" aria-label="Search transactions" />
-          <select id="category-filter" class="category-filter" aria-label="Filter by category"></select>
         </div>
       </div>
       <div id="table-container" class="table-container"></div>

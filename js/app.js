@@ -1,7 +1,7 @@
 import { store } from "./store.js";
 import { parsePdfFile } from "./pdfParser.js";
-import { ALL_CATEGORIES } from "./categories.js";
-import { computeStats, computeCategoryTotals, computeMonthlyTotals } from "./summary.js";
+import { ALL_CATEGORIES, categoryById } from "./categories.js";
+import { PERIODS, filterByPeriod, computeStats, computeCategoryTotals, computeMonthlyTotals } from "./summary.js";
 import { renderCategoryChart, renderTrendChart } from "./charts.js";
 import { renderTable } from "./table.js";
 
@@ -18,36 +18,53 @@ const statIncome = document.getElementById("stat-income");
 const statNet = document.getElementById("stat-net");
 const statCount = document.getElementById("stat-count");
 
+const periodTabsEl = document.getElementById("period-tabs");
+const themeFilter = document.getElementById("theme-filter");
+const categoryChartCard = document.getElementById("category-chart-card");
 const categoryChartEl = document.getElementById("category-chart");
+const trendHeading = document.getElementById("trend-heading");
 const trendChartEl = document.getElementById("trend-chart");
 
 const searchInput = document.getElementById("search-input");
-const categoryFilter = document.getElementById("category-filter");
 const tableContainer = document.getElementById("table-container");
 
 const money = (v) =>
   v.toLocaleString(undefined, { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 let sortState = { key: "date", dir: "desc" };
-let filters = { search: "", category: "all" };
+let filters = { search: "", category: "all", period: "all" };
 
-function populateCategoryFilter() {
-  categoryFilter.innerHTML = '<option value="all">All categories</option>';
+function populateThemeFilter() {
+  themeFilter.innerHTML = '<option value="all">All themes</option>';
   for (const cat of ALL_CATEGORIES) {
     const opt = document.createElement("option");
     opt.value = cat.id;
     opt.textContent = cat.label;
-    categoryFilter.appendChild(opt);
+    themeFilter.appendChild(opt);
   }
 }
 
-function applyFilters(transactions) {
+function renderPeriodTabs() {
+  periodTabsEl.innerHTML = "";
+  for (const period of PERIODS) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `period-tab${filters.period === period.id ? " active" : ""}`;
+    btn.textContent = period.label;
+    btn.title = period.title;
+    btn.addEventListener("click", () => {
+      if (filters.period === period.id) return;
+      filters.period = period.id;
+      render(store.getState());
+    });
+    periodTabsEl.appendChild(btn);
+  }
+}
+
+function applySearch(transactions) {
   const q = filters.search.trim().toLowerCase();
-  return transactions.filter((tx) => {
-    if (filters.category !== "all" && tx.category !== filters.category) return false;
-    if (q && !tx.description.toLowerCase().includes(q)) return false;
-    return true;
-  });
+  if (!q) return transactions;
+  return transactions.filter((tx) => tx.description.toLowerCase().includes(q));
 }
 
 function render(state) {
@@ -69,17 +86,28 @@ function render(state) {
     sourceList.appendChild(li);
   }
 
-  const stats = computeStats(transactions);
+  renderPeriodTabs();
+  if (themeFilter.value !== filters.category) themeFilter.value = filters.category;
+
+  const periodScoped = filterByPeriod(transactions, filters.period);
+  const themeScoped =
+    filters.category === "all" ? periodScoped : periodScoped.filter((tx) => tx.category === filters.category);
+
+  const stats = computeStats(themeScoped);
   statSpend.textContent = money(stats.spend);
   statIncome.textContent = money(stats.income);
   statNet.textContent = money(stats.net);
   statNet.classList.toggle("negative", stats.net < 0);
   statCount.textContent = stats.count.toLocaleString();
 
-  renderCategoryChart(categoryChartEl, computeCategoryTotals(transactions));
-  renderTrendChart(trendChartEl, computeMonthlyTotals(transactions));
+  const themeSelected = filters.category !== "all";
+  categoryChartCard.hidden = themeSelected;
+  if (!themeSelected) renderCategoryChart(categoryChartEl, computeCategoryTotals(themeScoped));
 
-  const filtered = applyFilters(transactions);
+  trendHeading.textContent = themeSelected ? `${categoryById(filters.category).label} monthly trend` : "Monthly spend trend";
+  renderTrendChart(trendChartEl, computeMonthlyTotals(themeScoped, filters.category));
+
+  const filtered = applySearch(themeScoped);
   renderTable(tableContainer, filtered, {
     sortState,
     onSortChange: (key) => {
@@ -157,11 +185,11 @@ searchInput.addEventListener("input", () => {
   filters.search = searchInput.value;
   render(store.getState());
 });
-categoryFilter.addEventListener("change", () => {
-  filters.category = categoryFilter.value;
+themeFilter.addEventListener("change", () => {
+  filters.category = themeFilter.value;
   render(store.getState());
 });
 
-populateCategoryFilter();
+populateThemeFilter();
 store.subscribe(render);
 render(store.getState());
