@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finance Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="app-header">
+      <div>
+        <h1>Finance Dashboard</h1>
+        <p class="subtitle">Understand your spending, straight from your bank statements.</p>
+      </div>
+      <p class="privacy-note">🔒 Everything runs in your browser. Your statements never leave this device.</p>
+    </header>
+
+    <section class="card upload-card" aria-labelledby="upload-heading">
+      <h2 id="upload-heading">Upload statements</h2>
+      <div id="dropzone" class="dropzone">
+        <p class="dropzone-title">Drag and drop PDF statements here</p>
+        <p class="dropzone-subtitle">Bank or credit card statements — parsed entirely on your device.</p>
+        <button type="button" id="browse-btn" class="btn btn-primary">Choose files</button>
+        <input type="file" id="file-input" accept="application/pdf,.pdf" multiple hidden />
+      </div>
+      <p id="upload-status" class="upload-status" hidden></p>
+
+      <div class="upload-footer">
+        <ul id="source-list" class="source-list"></ul>
+        <div class="upload-actions">
+          <span id="sample-badge" class="sample-badge" hidden>Showing sample data</span>
+          <button type="button" id="clear-btn" class="btn btn-ghost">Clear all data</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="summary-heading">
+      <div class="summary-header">
+        <h2 id="summary-heading">Summary</h2>
+        <div class="filters-bar">
+          <div id="period-tabs" class="period-tabs" role="group" aria-label="Time period"></div>
+          <select id="theme-filter" class="theme-filter" aria-label="Filter by theme"></select>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-tile">
+          <span class="stat-label">Total spend</span>
+          <span id="stat-spend" class="stat-value">$0.00</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-label">Total income</span>
+          <span id="stat-income" class="stat-value">$0.00</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-label">Net</span>
+          <span id="stat-net" class="stat-value">$0.00</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-label">Transactions</span>
+          <span id="stat-count" class="stat-value">0</span>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div id="category-chart-card" class="chart-card">
+          <h3>Spend by theme</h3>
+          <div id="category-chart" class="chart-container"></div>
+        </div>
+        <div class="chart-card">
+          <h3 id="trend-heading">Monthly spend trend</h3>
+          <div id="trend-chart" class="chart-container"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="transactions-heading">
+      <div class="transactions-header">
+        <h2 id="transactions-heading">Transactions</h2>
+        <div class="table-filters">
+          <input type="search" id="search-input" class="search-input" placeholder="Search description…" aria-label="Search transactions" />
+        </div>
+      </div>
+      <div id="table-container" class="table-container"></div>
+    </section>
+
+    <footer class="app-footer">
+      <p>No servers, no accounts, no tracking. Parsing and categorisation happen locally; clearing your browser data clears this dashboard.</p>
+    </footer>
+  </div>
+
+  <script src="vendor/pdfjs/pdf.min.js"></script>
+  <script>
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = "vendor/pdfjs/pdf.worker.min.js";
+  </script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
