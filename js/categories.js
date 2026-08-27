@@ -14,6 +14,9 @@ export const CATEGORIES = [
       "trader joe", "aldi", "publix", "costco", "grocery", "groceries",
       "supermarket", "tesco", "sainsbury", "asda", "lidl", "food lion",
       "harris teeter", "wegmans", "sprouts", "market basket",
+      "morrisons", "waitrose", "marks & spencer", "m&s simply food",
+      "m&s food", "co-op", "coop food", "iceland", "spar", "budgens",
+      "farmfoods", "ocado",
     ],
   },
   {
@@ -26,6 +29,8 @@ export const CATEGORIES = [
       "doordash", "uber eats", "ubereats", "grubhub", "postmates", "pizza",
       "grill", "diner", "deli", "bakery", "taco", "sushi", "burger",
       "wendy's", "chick-fil-a", "dunkin", "panera", "bar & grill",
+      "greggs", "nando's", "nandos", "wagamama", "pret a manger", "costa coffee",
+      "wetherspoon", "kfc", "just eat", "deliveroo", "shake shack",
     ],
   },
   {
@@ -38,6 +43,8 @@ export const CATEGORIES = [
       "parking", "transit", "metro", "mta", "amtrak", "delta air",
       "united air", "southwest air", "airline", "toll", "car rental",
       "hertz", "avis", "enterprise rent",
+      "trainline", "national rail", "stagecoach", "national express",
+      "tfl.gov", "tfl travel", "service station",
     ],
   },
   {
@@ -50,6 +57,12 @@ export const CATEGORIES = [
       "xfinity", "at&t", "att bill", "verizon", "t-mobile", "internet",
       "insurance", "mortgage", "rent payment", "gas bill", "power co",
       "water & sewer", "waste management",
+      "british gas", "octopus energy", "edf energy", "e.on", "eon next",
+      "scottish power", "thames water", "yorkshire water", "severn trent",
+      "council tax", "nfu mutual", "aviva", "admiral insurance",
+      "direct line", "geico", "sky broadband", "sky tv", "virgin media",
+      "ee ltd", "vodafone", "o2 ", "three mobile", "honest mobile",
+      "giffgaff", "aa membership", "rac ", "personal loan", " mtg ",
     ],
   },
   {
@@ -61,7 +74,7 @@ export const CATEGORIES = [
       "netflix", "spotify", "hulu", "disney+", "disney plus", "amazon prime",
       "apple.com/bill", "icloud", "subscription", "youtube premium",
       "hbo max", "audible", "planet fitness", "gym membership", "patreon",
-      "adobe", "microsoft 365",
+      "adobe", "microsoft 365", "now tv", "paramount+", "prime video",
     ],
   },
   {
@@ -70,9 +83,10 @@ export const CATEGORIES = [
     color: "#008300",
     darkColor: "#008300",
     keywords: [
-      "amazon", "target", "best buy", "ebay", "etsy", "ikea", "macy's",
+      "amazon", "amzn", "target", "best buy", "ebay", "etsy", "ikea", "macy's",
       "nordstrom", "old navy", "home depot", "lowe's", "tj maxx",
       "marshalls", "sephora", "online store", "shein", "wayfair",
+      "moonpig", "iherb",
     ],
   },
   {
@@ -83,7 +97,7 @@ export const CATEGORIES = [
     keywords: [
       "movie", "cinema", "amc", "theatre", "theater", "concert",
       "ticketmaster", "steam", "playstation", "xbox", "nintendo",
-      "bowling", "museum", "amusement",
+      "bowling", "museum", "amusement", "golf",
     ],
   },
   {
@@ -93,6 +107,7 @@ export const CATEGORIES = [
     darkColor: "#e66767",
     keywords: [
       "pharmacy", "cvs", "walgreens", "doctor", "dental", "dentist",
+      "boots", "superdrug", "denplan", "medexpress",
       "clinic", "hospital", "medical", "urgent care", "optometry",
       "physical therapy", "labcorp",
     ],

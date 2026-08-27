@@ -37,12 +37,30 @@ requests.
 ## How parsing works
 
 Statement layouts vary enormously between banks and card issuers, so parsing
-is heuristic: each page's text is grouped into lines, and lines that look
-like `<date> ... <description> ... <amount>` are extracted as transactions.
-If a PDF is a scanned image with no selectable text, or uses a layout the
-parser doesn't recognise, it won't find transactions — you'll see a message
-saying so. Auto-categorisation is keyword-based and won't always be right;
-use the category dropdown on any row to fix it.
+is heuristic rather than tuned to one bank. Each page's text is grouped into
+lines, then:
+
+- the whole document is scanned once to work out whether dates are
+  day-first or month-first, and to find a default year for dates printed
+  without one
+- if a "Date / Description / Amount" (or "Paid In / Withdrawn / Balance")
+  table header is found, its column x-positions are used to classify
+  numbers correctly (so a split Paid-In/Withdrawn ledger isn't misread as a
+  single signed column); otherwise it falls back to reading the last one or
+  two numbers on each line
+- a transaction date or description that's only printed once per day/batch
+  is carried forward, and a description that wraps onto the previous line
+  is picked up from there
+
+This has been tested against real UK current-account and credit-card
+statement layouts (single-amount-column, split Paid-In/Withdrawn ledgers,
+and two-date credit card rows) and reconstructs totals that match the
+statement's own summary. It's still a heuristic, though: a PDF that's a
+scanned image with no selectable text, or an unrecognised layout, won't
+produce transactions — you'll see a message saying so. Auto-categorisation
+is keyword-based and won't always be right, and amount sign can be
+ambiguous on some layouts (e.g. incoming transfers with no visible +/- in
+the extracted text); use the category dropdown on any row to fix it.
 
 ## Project structure
 
