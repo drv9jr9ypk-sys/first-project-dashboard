@@ -35,6 +35,9 @@ device.
 - "Month-on-month by category" view: spend in the most recent complete
   month versus the one before it, per category, sorted by largest increase
   first, with the change shown in both £ and %
+- "Top 10 merchants by spend" table: total spent, transaction count, and
+  average per transaction per merchant, respecting the selected time-period
+  filter
 - Sample data included, so the dashboard is meaningful before you upload
   anything
 - Data persists locally (`localStorage`) between visits; "Clear all data"
@@ -94,6 +97,8 @@ js/recurring.js       Recurring-payment detection
 js/recurringTable.js  Recurring & subscriptions panel rendering
 js/monthOverMonth.js       Month-on-month by category calculations
 js/monthOverMonthTable.js  Month-on-month by category table rendering
+js/topMerchants.js         Top merchants by spend calculations
+js/topMerchantsTable.js    Top merchants by spend table rendering
 js/summary.js        Stats / category totals / monthly totals
 js/charts.js          Dependency-free SVG charts
 js/table.js          Sortable transaction table

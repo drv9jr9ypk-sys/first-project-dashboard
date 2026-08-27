@@ -678,6 +678,15 @@ body {
   color: var(--success);
 }
 
+/* ---------- Top merchants ---------- */
+
+.col-rank {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  width: 1%;
+  white-space: nowrap;
+}
+
 /* ---------- Transactions ---------- */
 
 .transactions-header {

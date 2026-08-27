@@ -18,6 +18,8 @@ import { detectRecurring, computeCommittedMonthlySpend } from "./recurring.js";
 import { renderRecurringPanel } from "./recurringTable.js";
 import { computeMonthOverMonth } from "./monthOverMonth.js";
 import { renderMonthOverMonth } from "./monthOverMonthTable.js";
+import { computeTopMerchants } from "./topMerchants.js";
+import { renderTopMerchants } from "./topMerchantsTable.js";
 
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("file-input");
@@ -48,6 +50,8 @@ const tableContainer = document.getElementById("table-container");
 const recurringCommitted = document.getElementById("recurring-committed");
 const recurringContainer = document.getElementById("recurring-container");
 const momContainer = document.getElementById("mom-container");
+const topMerchantsSubtitle = document.getElementById("top-merchants-subtitle");
+const topMerchantsContainer = document.getElementById("top-merchants-container");
 
 const rulesToggle = document.getElementById("rules-toggle");
 const rulesCount = document.getElementById("rules-count");
@@ -173,6 +177,12 @@ function renderMonthOverMonthSection(transactions) {
   renderMonthOverMonth(momContainer, computeMonthOverMonth(transactions));
 }
 
+function renderTopMerchantsSection(periodScopedTransactions) {
+  const period = PERIODS.find((p) => p.id === filters.period);
+  topMerchantsSubtitle.textContent = `For the selected time period (${period.title.toLowerCase()}).`;
+  renderTopMerchants(topMerchantsContainer, computeTopMerchants(periodScopedTransactions));
+}
+
 function applySearch(transactions) {
   const q = filters.search.trim().toLowerCase();
   if (!q) return transactions;
@@ -208,6 +218,7 @@ function render(state) {
   if (groupSmallToggle.checked !== filters.groupSmall) groupSmallToggle.checked = filters.groupSmall;
 
   const periodScoped = filterByPeriod(transactions, filters.period);
+  renderTopMerchantsSection(periodScoped);
   const themeScoped =
     filters.category === "all" ? periodScoped : periodScoped.filter((tx) => tx.category === filters.category);
 
