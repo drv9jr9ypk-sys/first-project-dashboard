@@ -16,6 +16,8 @@ import { renderCategoryChart, renderRadialChart, renderTrendChart } from "./char
 import { renderTable } from "./table.js";
 import { detectRecurring, computeCommittedMonthlySpend } from "./recurring.js";
 import { renderRecurringPanel } from "./recurringTable.js";
+import { computeMonthOverMonth } from "./monthOverMonth.js";
+import { renderMonthOverMonth } from "./monthOverMonthTable.js";
 
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("file-input");
@@ -45,6 +47,7 @@ const tableContainer = document.getElementById("table-container");
 
 const recurringCommitted = document.getElementById("recurring-committed");
 const recurringContainer = document.getElementById("recurring-container");
+const momContainer = document.getElementById("mom-container");
 
 const rulesToggle = document.getElementById("rules-toggle");
 const rulesCount = document.getElementById("rules-count");
@@ -166,6 +169,10 @@ function renderRecurring(transactions) {
   });
 }
 
+function renderMonthOverMonthSection(transactions) {
+  renderMonthOverMonth(momContainer, computeMonthOverMonth(transactions));
+}
+
 function applySearch(transactions) {
   const q = filters.search.trim().toLowerCase();
   if (!q) return transactions;
@@ -195,6 +202,7 @@ function render(state) {
   renderChartTypeTabs();
   renderRulesPanel();
   renderRecurring(transactions);
+  renderMonthOverMonthSection(transactions);
   if (themeFilter.value !== filters.category) themeFilter.value = filters.category;
   if (categorySortEl.value !== filters.categorySort) categorySortEl.value = filters.categorySort;
   if (groupSmallToggle.checked !== filters.groupSmall) groupSmallToggle.checked = filters.groupSmall;

@@ -10,6 +10,7 @@
   --border: rgba(11, 11, 11, 0.1);
   --success: #006300;
   --critical: #d03b3b;
+  --warning: #9a5b00;
   --accent: #2a78d6;
   --accent-wash: rgba(42, 120, 214, 0.08);
 
@@ -38,6 +39,7 @@
     --border: rgba(255, 255, 255, 0.1);
     --success: #0ca30c;
     --critical: #e66767;
+    --warning: #fab219;
     --accent: #3987e5;
     --accent-wash: rgba(57, 135, 229, 0.14);
 
@@ -660,6 +662,20 @@ body {
 .recurring-dismiss:hover {
   background: var(--border);
   color: var(--critical);
+}
+
+/* ---------- Month-on-month by category ---------- */
+
+.mom-table th {
+  white-space: nowrap;
+}
+
+.mom-increase {
+  color: var(--warning);
+}
+
+.mom-decrease {
+  color: var(--success);
 }
 
 /* ---------- Transactions ---------- */
