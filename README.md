@@ -14,9 +14,15 @@ device.
 - Automatic categorisation (groceries, eating out, transport, bills &
   utilities, subscriptions, shopping, entertainment, health, income)
 - Manual re-categorisation via a dropdown on any transaction
-- Summary view: total spend, total income, net, spend by category, and a
-  month-on-month spend trend
-- Sortable, searchable, filterable transaction table
+- All amounts shown in GBP (£)
+- Summary view: total spend, total income, net, spend by theme, and a
+  monthly spend trend
+- Time-period filter (last month / 3 / 6 / 12 months / all time) and a theme
+  filter that scope the whole dashboard, not just the table
+- Spend-by-theme chart is switchable between bar, donut, and pie, with
+  customisable arrangement (sort by size or alphabetically, and optionally
+  fold small slices into "Other")
+- Sortable, searchable transaction table
 - Sample data included, so the dashboard is meaningful before you upload
   anything
 - Data persists locally (`localStorage`) between visits; "Clear all data"

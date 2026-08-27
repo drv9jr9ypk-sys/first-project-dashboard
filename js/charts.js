@@ -12,9 +12,9 @@ function el(tag, attrs = {}) {
 }
 
 function formatMoney(value) {
-  return value.toLocaleString(undefined, {
+  return value.toLocaleString("en-GB", {
     style: "currency",
-    currency: "USD",
+    currency: "GBP",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   });
@@ -137,6 +137,154 @@ export function renderCategoryChart(container, data) {
   container.appendChild(svg);
 }
 
+function polarPoint(cx, cy, r, angle) {
+  return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+}
+
+/** Build an SVG arc path for one slice; rInner === 0 gives a pie slice, rInner > 0 an annulus segment. */
+function arcPath(cx, cy, rOuter, rInner, startAngle, endAngle) {
+  const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
+  const outerStart = polarPoint(cx, cy, rOuter, startAngle);
+  const outerEnd = polarPoint(cx, cy, rOuter, endAngle);
+
+  if (rInner <= 0) {
+    return `M ${cx} ${cy} L ${outerStart.x} ${outerStart.y} A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${outerEnd.x} ${outerEnd.y} Z`;
+  }
+
+  const innerStart = polarPoint(cx, cy, rInner, startAngle);
+  const innerEnd = polarPoint(cx, cy, rInner, endAngle);
+  return (
+    `M ${outerStart.x} ${outerStart.y} A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${outerEnd.x} ${outerEnd.y} ` +
+    `L ${innerEnd.x} ${innerEnd.y} A ${rInner} ${rInner} 0 ${largeArc} 0 ${innerStart.x} ${innerStart.y} Z`
+  );
+}
+
+/**
+ * Pie or donut chart: one slice per category, plus a legend (always present -
+ * this is a >=2-series categorical chart). data: [{ id, label, total, color }]
+ */
+export function renderRadialChart(container, data, { variant = "donut" } = {}) {
+  container.innerHTML = "";
+
+  if (data.length === 0) {
+    container.innerHTML = '<p class="chart-empty">No spending yet — upload a statement to see the breakdown.</p>';
+    return;
+  }
+
+  const size = 240;
+  const cx = size / 2;
+  const cy = size / 2;
+  const rOuter = size / 2 - 4;
+  const rInner = variant === "donut" ? rOuter * 0.6 : 0;
+  const total = data.reduce((sum, d) => sum + d.total, 0);
+
+  const svg = el("svg", {
+    viewBox: `0 0 ${size} ${size}`,
+    class: "chart-svg radial-chart",
+    role: "img",
+    "aria-label": "Spend by theme",
+  });
+
+  const tip = ensureTooltip(container);
+
+  if (data.length === 1) {
+    const d = data[0];
+    const shape =
+      rInner > 0
+        ? el("circle", {
+            cx,
+            cy,
+            r: (rOuter + rInner) / 2,
+            fill: "none",
+            stroke: `var(--cat-${d.id})`,
+            "stroke-width": rOuter - rInner,
+          })
+        : el("circle", { cx, cy, r: rOuter, fill: `var(--cat-${d.id})` });
+    svg.appendChild(shape);
+    wireTooltip(shape, container, tip, `${d.label}: ${formatMoney(d.total)} (100%)`);
+  } else {
+    let angle = -Math.PI / 2;
+    for (const d of data) {
+      const frac = d.total / total;
+      const sweep = frac * Math.PI * 2;
+      const startAngle = angle;
+      const endAngle = angle + sweep;
+
+      const slice = el("path", {
+        d: arcPath(cx, cy, rOuter, rInner, startAngle, endAngle),
+        fill: `var(--cat-${d.id})`,
+        stroke: "var(--surface-1)",
+        "stroke-width": 2,
+        "stroke-linejoin": "round",
+      });
+      svg.appendChild(slice);
+      wireTooltip(slice, container, tip, `${d.label}: ${formatMoney(d.total)} (${Math.round(frac * 100)}%)`);
+
+      if (sweep > 0.35) {
+        const midAngle = (startAngle + endAngle) / 2;
+        const labelR = rInner > 0 ? (rOuter + rInner) / 2 : rOuter * 0.66;
+        const pos = polarPoint(cx, cy, labelR, midAngle);
+        const label = el("text", {
+          x: pos.x,
+          y: pos.y,
+          "text-anchor": "middle",
+          "dominant-baseline": "middle",
+          class: "chart-label-on-fill",
+          fill: relativeLuminance(d.color) > 0.55 ? "#0b0b0b" : "#ffffff",
+        });
+        label.textContent = `${Math.round(frac * 100)}%`;
+        svg.appendChild(label);
+      }
+
+      angle = endAngle;
+    }
+  }
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "radial-chart-wrapper";
+  wrapper.appendChild(svg);
+
+  if (variant === "donut") {
+    const center = document.createElement("div");
+    center.className = "donut-center";
+    const totalEl = document.createElement("span");
+    totalEl.className = "donut-total";
+    totalEl.textContent = formatMoney(total);
+    const captionEl = document.createElement("span");
+    captionEl.className = "donut-caption";
+    captionEl.textContent = "Total";
+    center.appendChild(totalEl);
+    center.appendChild(captionEl);
+    wrapper.appendChild(center);
+  }
+
+  container.appendChild(wrapper);
+
+  const legend = document.createElement("ul");
+  legend.className = "chart-legend";
+  for (const d of data) {
+    const li = document.createElement("li");
+
+    const swatch = document.createElement("span");
+    swatch.className = "legend-swatch";
+    swatch.style.background = `var(--cat-${d.id})`;
+
+    const label = document.createElement("span");
+    label.className = "legend-label";
+    label.textContent = d.label;
+
+    const value = document.createElement("span");
+    value.className = "legend-value";
+    value.textContent = `${formatMoney(d.total)} · ${Math.round((d.total / total) * 100)}%`;
+
+    li.appendChild(swatch);
+    li.appendChild(label);
+    li.appendChild(value);
+    legend.appendChild(li);
+  }
+  container.appendChild(legend);
+}
+
 /**
  * Monthly trend line chart (single series: total spend per month).
  * data: [{ month: 'YYYY-MM', label: 'Aug 2026', total }] ascending by month.
@@ -177,7 +325,7 @@ export function renderTrendChart(container, data) {
     const y = yFor(val);
     svg.appendChild(el("line", { x1: padL, x2: width - padR, y1: y, y2: y, class: "chart-gridline" }));
     const label = el("text", { x: padL - 8, y: y + 3, class: "chart-axis-label", "text-anchor": "end" });
-    label.textContent = val >= 1000 ? `$${Math.round(val / 1000)}k` : `$${Math.round(val)}`;
+    label.textContent = val >= 1000 ? `£${Math.round(val / 1000)}k` : `£${Math.round(val)}`;
     svg.appendChild(label);
   }
 

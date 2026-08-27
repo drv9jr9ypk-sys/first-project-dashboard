@@ -1,4 +1,43 @@
-import { INCOME_CATEGORY, categoryById } from "./categories.js";
+import { INCOME_CATEGORY, OTHER_CATEGORY, categoryById } from "./categories.js";
+
+export const CHART_TYPES = [
+  { id: "bar", label: "Bar" },
+  { id: "donut", label: "Donut" },
+  { id: "pie", label: "Pie" },
+];
+
+export const SORT_ORDERS = [
+  { id: "value-desc", label: "Largest first" },
+  { id: "value-asc", label: "Smallest first" },
+  { id: "alpha", label: "A–Z" },
+];
+
+/**
+ * Presentation-only re-arrangement of category totals for the "Spend by
+ * theme" chart: sort order, and optionally folding small slices (< 4% of
+ * the total) into a single "Other" wedge so a pie/donut with many themes
+ * stays readable. Doesn't touch underlying transaction categorisation.
+ */
+export function arrangeCategoryData(data, { sort = "value-desc", groupSmall = false } = {}) {
+  let arranged = data;
+
+  if (groupSmall && data.length > 2) {
+    const total = data.reduce((sum, d) => sum + d.total, 0);
+    const threshold = total * 0.04;
+    const kept = data.filter((d) => d.total >= threshold);
+    const folded = data.filter((d) => d.total < threshold);
+    if (folded.length > 1) {
+      const foldedTotal = folded.reduce((sum, d) => sum + d.total, 0);
+      arranged = [...kept, { id: OTHER_CATEGORY.id, label: OTHER_CATEGORY.label, color: OTHER_CATEGORY.color, total: foldedTotal }];
+    }
+  }
+
+  arranged = [...arranged];
+  if (sort === "value-asc") arranged.sort((a, b) => a.total - b.total);
+  else if (sort === "alpha") arranged.sort((a, b) => a.label.localeCompare(b.label));
+  else arranged.sort((a, b) => b.total - a.total);
+  return arranged;
+}
 
 export const PERIODS = [
   { id: "1m", label: "1M", title: "Last month" },
