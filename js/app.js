@@ -1,8 +1,17 @@
 import { store } from "./store.js";
 import { parsePdfFile } from "./pdfParser.js";
 import { ALL_CATEGORIES, categoryById } from "./categories.js";
-import { PERIODS, filterByPeriod, computeStats, computeCategoryTotals, computeMonthlyTotals } from "./summary.js";
-import { renderCategoryChart, renderTrendChart } from "./charts.js";
+import {
+  PERIODS,
+  CHART_TYPES,
+  SORT_ORDERS,
+  filterByPeriod,
+  computeStats,
+  computeCategoryTotals,
+  computeMonthlyTotals,
+  arrangeCategoryData,
+} from "./summary.js";
+import { renderCategoryChart, renderRadialChart, renderTrendChart } from "./charts.js";
 import { renderTable } from "./table.js";
 
 const dropzone = document.getElementById("dropzone");
@@ -22,6 +31,9 @@ const periodTabsEl = document.getElementById("period-tabs");
 const themeFilter = document.getElementById("theme-filter");
 const categoryChartCard = document.getElementById("category-chart-card");
 const categoryChartEl = document.getElementById("category-chart");
+const chartTypeTabsEl = document.getElementById("chart-type-tabs");
+const categorySortEl = document.getElementById("category-sort");
+const groupSmallToggle = document.getElementById("group-small-toggle");
 const trendHeading = document.getElementById("trend-heading");
 const trendChartEl = document.getElementById("trend-chart");
 
@@ -29,10 +41,10 @@ const searchInput = document.getElementById("search-input");
 const tableContainer = document.getElementById("table-container");
 
 const money = (v) =>
-  v.toLocaleString(undefined, { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  v.toLocaleString("en-GB", { style: "currency", currency: "GBP", minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 let sortState = { key: "date", dir: "desc" };
-let filters = { search: "", category: "all", period: "all" };
+let filters = { search: "", category: "all", period: "all", chartType: "bar", categorySort: "value-desc", groupSmall: false };
 
 function populateThemeFilter() {
   themeFilter.innerHTML = '<option value="all">All themes</option>';
@@ -49,7 +61,7 @@ function renderPeriodTabs() {
   for (const period of PERIODS) {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = `period-tab${filters.period === period.id ? " active" : ""}`;
+    btn.className = `segmented-tab${filters.period === period.id ? " active" : ""}`;
     btn.textContent = period.label;
     btn.title = period.title;
     btn.addEventListener("click", () => {
@@ -58,6 +70,32 @@ function renderPeriodTabs() {
       render(store.getState());
     });
     periodTabsEl.appendChild(btn);
+  }
+}
+
+function renderChartTypeTabs() {
+  chartTypeTabsEl.innerHTML = "";
+  for (const type of CHART_TYPES) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `segmented-tab${filters.chartType === type.id ? " active" : ""}`;
+    btn.textContent = type.label;
+    btn.addEventListener("click", () => {
+      if (filters.chartType === type.id) return;
+      filters.chartType = type.id;
+      render(store.getState());
+    });
+    chartTypeTabsEl.appendChild(btn);
+  }
+}
+
+function populateSortOptions() {
+  categorySortEl.innerHTML = "";
+  for (const order of SORT_ORDERS) {
+    const opt = document.createElement("option");
+    opt.value = order.id;
+    opt.textContent = order.label;
+    categorySortEl.appendChild(opt);
   }
 }
 
@@ -87,7 +125,10 @@ function render(state) {
   }
 
   renderPeriodTabs();
+  renderChartTypeTabs();
   if (themeFilter.value !== filters.category) themeFilter.value = filters.category;
+  if (categorySortEl.value !== filters.categorySort) categorySortEl.value = filters.categorySort;
+  if (groupSmallToggle.checked !== filters.groupSmall) groupSmallToggle.checked = filters.groupSmall;
 
   const periodScoped = filterByPeriod(transactions, filters.period);
   const themeScoped =
@@ -102,7 +143,14 @@ function render(state) {
 
   const themeSelected = filters.category !== "all";
   categoryChartCard.hidden = themeSelected;
-  if (!themeSelected) renderCategoryChart(categoryChartEl, computeCategoryTotals(themeScoped));
+  if (!themeSelected) {
+    const arranged = arrangeCategoryData(computeCategoryTotals(themeScoped), {
+      sort: filters.categorySort,
+      groupSmall: filters.groupSmall,
+    });
+    if (filters.chartType === "bar") renderCategoryChart(categoryChartEl, arranged);
+    else renderRadialChart(categoryChartEl, arranged, { variant: filters.chartType });
+  }
 
   trendHeading.textContent = themeSelected ? `${categoryById(filters.category).label} monthly trend` : "Monthly spend trend";
   renderTrendChart(trendChartEl, computeMonthlyTotals(themeScoped, filters.category));
@@ -189,7 +237,16 @@ themeFilter.addEventListener("change", () => {
   filters.category = themeFilter.value;
   render(store.getState());
 });
+categorySortEl.addEventListener("change", () => {
+  filters.categorySort = categorySortEl.value;
+  render(store.getState());
+});
+groupSmallToggle.addEventListener("change", () => {
+  filters.groupSmall = groupSmallToggle.checked;
+  render(store.getState());
+});
 
 populateThemeFilter();
+populateSortOptions();
 store.subscribe(render);
 render(store.getState());

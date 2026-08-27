@@ -14,8 +14,8 @@ function formatDate(iso) {
 }
 
 function formatAmount(amount) {
-  const abs = Math.abs(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  return amount < 0 ? `-$${abs}` : `+$${abs}`;
+  const abs = Math.abs(amount).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return amount < 0 ? `-£${abs}` : `+£${abs}`;
 }
 
 export function sortTransactions(transactions, sortState) {

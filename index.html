@@ -64,7 +64,21 @@
 
       <div class="chart-grid">
         <div id="category-chart-card" class="chart-card">
-          <h3>Spend by theme</h3>
+          <div class="chart-card-header">
+            <h3>Spend by theme</h3>
+            <div class="chart-arrange-controls">
+              <div id="chart-type-tabs" class="segmented-tabs" role="group" aria-label="Chart type"></div>
+              <select id="category-sort" class="arrange-select" aria-label="Sort order">
+                <option value="value-desc">Largest first</option>
+                <option value="value-asc">Smallest first</option>
+                <option value="alpha">A–Z</option>
+              </select>
+              <label class="group-small-toggle">
+                <input type="checkbox" id="group-small-toggle" />
+                Group small slices
+              </label>
+            </div>
+          </div>
           <div id="category-chart" class="chart-container"></div>
         </div>
         <div class="chart-card">
